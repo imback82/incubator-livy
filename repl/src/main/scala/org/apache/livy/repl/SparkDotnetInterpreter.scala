@@ -198,8 +198,12 @@ class SparkDotnetInterpreter(
   }
 
   private def sendRequest(code: String): RequestResponse = {
-    stdin.println(s"""${StringEscapeUtils.escapeJava(code)}""".stripMargin)
+    val ccode = StringEscapeUtils.escapeJava(code).stripMargin
+    warn(s"About to execute $ccode")
+    stdin.println(ccode)
     stdin.flush()
+
+    warn(s"Finished executing $ccode")
 
     readTo(">", "lkdsajglksadjgkjasldg")
   }
@@ -247,13 +251,14 @@ class SparkDotnetInterpreter(
     }
 
     if (output.endsWith(marker)) {
-      warn("found the end marker!")
       var result = stripMarker(output.toString(), marker)
 
       if (result.endsWith(errorMarker + "\"")) {
         result = stripMarker(result, "\\n" + errorMarker)
+        warn(s"Error result $result")
         RequestResponse(result, error = true)
       } else {
+        warn(s"Good result $result")
         RequestResponse(result, error = false)
       }
     } else {
