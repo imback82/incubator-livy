@@ -54,7 +54,7 @@ object SparkDotnetInterpreter extends Logging {
           .invoke(backendInstance, new Integer(0))
           .asInstanceOf[Int]
 
-        debug(s"spark .NET backend listening on port $sparkDotnetBackendPort")
+        warn(s"spark .NET backend listening on port $sparkDotnetBackendPort")
 
         initialized.release()
         sparkDotnetBackendClass.getMethod("run").invoke(backendInstance)
@@ -202,7 +202,7 @@ class SparkDotnetInterpreter(
     var line = ""
     var output = ""
     while ((line = stdout.readLine()) != null) {
-      debug(s"Read: $line");
+      warn(s"Read: $line");
       if (line != ">") {
         output = line
       }
