@@ -30,6 +30,7 @@ import org.apache.spark.sql.SQLContext
 import org.json4s.JsonDSL._
 import org.json4s._
 
+import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.reflect.runtime.universe
 
@@ -41,7 +42,8 @@ object SparkDotnetInterpreter extends Logging {
     sparkEntries = entries
     val backendTimeout = sys.env.getOrElse("DOTNETBACKEND_TIMEOUT", "120").toInt
     val mirror = universe.runtimeMirror(getClass.getClassLoader)
-    val sparkDotnetBackendClass = mirror.classLoader.loadClass("org.apache.spark.api.dotnet.DotnetBackend")
+    val sparkDotnetBackendClass =
+      mirror.classLoader.loadClass("org.apache.spark.api.dotnet.DotnetBackend")
     val backendInstance = sparkDotnetBackendClass.getDeclaredConstructor().newInstance()
 
     var sparkDotnetBackendPort = 0
@@ -167,7 +169,7 @@ class SparkDotnetInterpreter(
         """assign("sqlContext", get(".sqlc", envir = SparkR:::.sparkREnv), envir = .GlobalEnv)""")
       // scalastyle:on line.size.limit
     }
-    */
+     */
 
     isStarted.countDown()
     executionCount = 0
@@ -199,16 +201,7 @@ class SparkDotnetInterpreter(
     stdin.println(s"""${StringEscapeUtils.escapeJava(code)}""".stripMargin)
     stdin.flush()
 
-    var line = ""
-    var output = ""
-    while ((line = stdout.readLine()) != null) {
-      warn(s"Read: $line");
-      if (line != ">") {
-        output = line
-      }
-    }
-
-    RequestResponse(output, error = false)
+    readTo(">", "lkdsajglksadjgkjasldg")
   }
 
   override protected def sendShutdownRequest() = {
@@ -228,6 +221,75 @@ class SparkDotnetInterpreter(
       backendThread.join()
     } finally {
       super.close()
+    }
+  }
+
+  @tailrec
+  private def readTo(
+      marker: String,
+      errorMarker: String,
+      output: StringBuilder = StringBuilder.newBuilder): RequestResponse = {
+    var char = readChar(output)
+
+    // Remove any ANSI color codes which match the pattern "\u001b\\[[0-9;]*[mG]".
+    // It would be easier to do this with a regex, but unfortunately I don't see an easy way to do
+    // without copying the StringBuilder into a string for each character.
+    if (char == '\u001b') {
+      if (readChar(output) == '[') {
+        char = readDigits(output)
+
+        if (char == 'm' || char == 'G') {
+          output.delete(output.lastIndexOf('\u001b'), output.length)
+        }
+      }
+    }
+
+    if (output.endsWith(marker)) {
+      var result = stripMarker(output.toString(), marker)
+
+      if (result.endsWith(errorMarker + "\"")) {
+        result = stripMarker(result, "\\n" + errorMarker)
+        RequestResponse(result, error = true)
+      } else {
+        RequestResponse(result, error = false)
+      }
+    } else {
+      readTo(marker, errorMarker, output)
+    }
+  }
+
+  private def stripMarker(result: String, marker: String): String = {
+    result
+      .replace(marker, "")
+      .stripPrefix("\n")
+      .stripSuffix("\n")
+  }
+
+  private def readChar(output: StringBuilder): Char = {
+    val byte = stdout.read()
+    if (byte == -1) {
+      throw new Exited(output.toString())
+    } else {
+      val char = byte.toChar
+      output.append(char)
+      char
+    }
+  }
+
+  @tailrec
+  private def readDigits(output: StringBuilder): Char = {
+    val byte = stdout.read()
+    if (byte == -1) {
+      throw new Exited(output.toString())
+    }
+
+    val char = byte.toChar
+
+    if (('0' to '9').contains(char)) {
+      output.append(char)
+      readDigits(output)
+    } else {
+      char
     }
   }
 
