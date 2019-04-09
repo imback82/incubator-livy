@@ -53,7 +53,7 @@ object SparkDotnetInterpreter extends Logging {
       override def run(): Unit = {
         sparkDotnetBackendPort = sparkDotnetBackendClass
           .getMethod("init")
-          .invoke(backendInstance, 0)
+          .invoke(backendInstance, new Integer(0))
           .asInstanceOf[Int]
 
         initialized.release()
