@@ -33,8 +33,6 @@ import org.json4s._
 import scala.collection.JavaConverters._
 import scala.reflect.runtime.universe
 
-private case class RequestResponse(content: String, error: Boolean)
-
 // scalastyle:off println
 object SparkDotnetInterpreter extends Logging {
   private var sparkEntries: SparkEntries = null
