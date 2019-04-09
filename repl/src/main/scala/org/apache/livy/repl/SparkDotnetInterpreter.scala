@@ -231,6 +231,8 @@ class SparkDotnetInterpreter(
       output: StringBuilder = StringBuilder.newBuilder): RequestResponse = {
     var char = readChar(output)
 
+    warn(output.toString())
+
     // Remove any ANSI color codes which match the pattern "\u001b\\[[0-9;]*[mG]".
     // It would be easier to do this with a regex, but unfortunately I don't see an easy way to do
     // without copying the StringBuilder into a string for each character.
@@ -245,6 +247,7 @@ class SparkDotnetInterpreter(
     }
 
     if (output.endsWith(marker)) {
+      warn("found the end marker!")
       var result = stripMarker(output.toString(), marker)
 
       if (result.endsWith(errorMarker + "\"")) {
