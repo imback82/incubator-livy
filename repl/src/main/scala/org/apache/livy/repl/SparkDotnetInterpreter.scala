@@ -50,7 +50,7 @@ object SparkDotnetInterpreter extends Logging {
     val backendThread = new Thread("Spark .NET backend") {
       override def run(): Unit = {
         sparkDotnetBackendPort = sparkDotnetBackendClass
-          .getMethod("init")
+          .getMethod("init", Integer.TYPE)
           .invoke(backendInstance, new Integer(0))
           .asInstanceOf[Int]
 
