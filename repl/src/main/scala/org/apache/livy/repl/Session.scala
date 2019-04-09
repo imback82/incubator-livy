@@ -105,6 +105,7 @@ class Session(
             throw new IllegalStateException("SparkInterpreter should not be lazily created.")
           case PySpark => PythonInterpreter(sparkConf, entries)
           case SparkR => SparkRInterpreter(sparkConf, entries)
+          case SparkDotnet => SparkDotnetInterpreter(sparkConf, entries)
           case SQL => new SQLInterpreter(sparkConf, livyConf, entries)
         }
         interp.start()
