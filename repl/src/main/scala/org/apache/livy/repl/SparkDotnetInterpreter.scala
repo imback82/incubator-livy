@@ -199,13 +199,17 @@ class SparkDotnetInterpreter(
 
   private def sendRequest(code: String): RequestResponse = {
     val ccode = StringEscapeUtils.escapeJava(code).stripMargin
-    warn(s"About to execute $ccode")
+    warn(s"About to execute '$ccode'")
     stdin.println(ccode)
     stdin.flush()
 
-    warn(s"Finished executing $ccode")
+    warn(s"Finished executing '$ccode'")
 
-    readTo(">", "lkdsajglksadjgkjasldg")
+    val response = readTo(">", "lkdsajglksadjgkjasldg")
+
+    warn(s"Done reading the output for. '$ccode'")
+
+    response
   }
 
   override protected def sendShutdownRequest() = {
@@ -234,8 +238,6 @@ class SparkDotnetInterpreter(
       errorMarker: String,
       output: StringBuilder = StringBuilder.newBuilder): RequestResponse = {
     var char = readChar(output)
-
-    warn(output.toString())
 
     // Remove any ANSI color codes which match the pattern "\u001b\\[[0-9;]*[mG]".
     // It would be easier to do this with a regex, but unfortunately I don't see an easy way to do
