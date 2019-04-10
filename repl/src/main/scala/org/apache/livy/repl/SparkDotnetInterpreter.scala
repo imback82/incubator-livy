@@ -171,6 +171,7 @@ class SparkDotnetInterpreter(
     }
      */
 
+    sendRequest("1 + 1")
     isStarted.countDown()
     executionCount = 0
   }
