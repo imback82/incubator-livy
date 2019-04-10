@@ -171,7 +171,10 @@ class SparkDotnetInterpreter(
     }
      */
 
-    sendRequest("1 + 1")
+    // sendRequest("1 + 1")
+    val response = readTo("> ", "lkdsajglksadjgkjasldg")
+    val content = response;
+    warn(s"flusing: $content")
     isStarted.countDown()
     executionCount = 0
   }
