@@ -206,7 +206,7 @@ class SparkDotnetInterpreter(
 
     warn(s"Finished executing '$ccode'")
 
-    val response = readTo(">", "lkdsajglksadjgkjasldg")
+    val response = readTo("> ", "lkdsajglksadjgkjasldg")
 
     warn(s"Done reading the output for. '$ccode'")
 
@@ -239,7 +239,7 @@ class SparkDotnetInterpreter(
       errorMarker: String,
       output: StringBuilder = StringBuilder.newBuilder): RequestResponse = {
     var char = readChar(output)
-    warn(s"readTo: " + output.toString())
+    // warn(s"readTo: " + output.toString())
     // Remove any ANSI color codes which match the pattern "\u001b\\[[0-9;]*[mG]".
     // It would be easier to do this with a regex, but unfortunately I don't see an easy way to do
     // without copying the StringBuilder into a string for each character.
