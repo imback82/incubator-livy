@@ -350,8 +350,8 @@ class Session(
             (s"""setJobGroup("$jobGroup", "Job group for statement $jobGroup", FALSE)""", SparkR)
         }
       case SparkDotnet =>
-        (s"""hello""", SparkDotnet)
-        // (s"""spark.SparkContext.SetJobGroup("$jobGroup", "Job group for statement $jobGroup")""", SparkDotnet)
+        // (s"""hello""", SparkDotnet)
+        (s"""spark.SparkContext.SetJobGroup("$jobGroup", "Job group for statement $jobGroup")""", SparkDotnet)
     }
     // Set the job group
     executeCode(interpreter(tpe), statementId, cmd)
