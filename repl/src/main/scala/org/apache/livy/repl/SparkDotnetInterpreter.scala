@@ -202,7 +202,8 @@ class SparkDotnetInterpreter(
   }
 
   private def sendRequest(code: String): RequestResponse = {
-    val ccode = StringEscapeUtils.escapeJava(code).stripMargin
+    // val ccode = StringEscapeUtils.escapeJava(code).stripMargin
+    val ccode = code.stripMargin
     warn(s"About to execute '$ccode'")
     stdin.println(ccode)
     stdin.flush()
