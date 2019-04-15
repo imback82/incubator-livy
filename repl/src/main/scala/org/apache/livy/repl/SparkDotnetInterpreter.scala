@@ -20,7 +20,6 @@ package org.apache.livy.repl
 import java.io.File
 import java.util.concurrent.{CountDownLatch, Semaphore, TimeUnit}
 
-import org.apache.commons.lang.StringEscapeUtils
 import org.apache.livy.Logging
 import org.apache.livy.client.common.ClientConf
 import org.apache.livy.rsc.driver.SparkEntries
@@ -89,8 +88,8 @@ object SparkDotnetInterpreter extends Logging {
           packageDir = dotnetLibPath.getAbsolutePath()
         }
       }
-
-      val builder = new ProcessBuilder(Seq(dotnetExec).asJava)
+        
+      val builder = new ProcessBuilder(dotnetExec.split(" ").toSeq.asJava)
       val env = builder.environment()
       env.put("SPARK_HOME", sys.env.getOrElse("SPARK_HOME", "."))
       env.put("DOTNETBACKEND_PORT", sparkDotnetBackendPort.toString)
