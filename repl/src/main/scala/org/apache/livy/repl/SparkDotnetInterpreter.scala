@@ -88,7 +88,7 @@ object SparkDotnetInterpreter extends Logging {
           packageDir = dotnetLibPath.getAbsolutePath()
         }
       }
-        
+
       val builder = new ProcessBuilder(dotnetExec.split(" ").toSeq.asJava)
       val env = builder.environment()
       env.put("SPARK_HOME", sys.env.getOrElse("SPARK_HOME", "."))
@@ -217,7 +217,7 @@ class SparkDotnetInterpreter(
   }
 
   override protected def sendShutdownRequest() = {
-    stdin.println("q()")
+    stdin.println("#exit")
     stdin.flush()
 
     while (stdout.readLine() != null) {}
@@ -242,7 +242,7 @@ class SparkDotnetInterpreter(
       errorMarker: String,
       output: StringBuilder = StringBuilder.newBuilder): RequestResponse = {
     var char = readChar(output)
-    warn(s"readTo: " + output.toString())
+    warn(s"readTo: '" + output.toString() + "'")
     // Remove any ANSI color codes which match the pattern "\u001b\\[[0-9;]*[mG]".
     // It would be easier to do this with a regex, but unfortunately I don't see an easy way to do
     // without copying the StringBuilder into a string for each character.
@@ -268,6 +268,12 @@ class SparkDotnetInterpreter(
         RequestResponse(result, error = false)
       }
     } else {
+      if (output.endsWith("* ")) {
+        warn("continuation block found")
+        stdin.println(";")
+        stdin.flush()
+      }
+      
       readTo(marker, errorMarker, output)
     }
   }
