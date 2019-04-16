@@ -170,10 +170,15 @@ class SparkDotnetInterpreter(
     }
      */
 
-    // sendRequest("1 + 1")
     val response = readTo("> ", "lkdsajglksadjgkjasldg")
     val content = response;
     warn(s"flusing: $content")
+
+    val dotnetLibPath = sys.env.getOrElse("SPARK_DOTNET_PACKAGE_DIR", ".")
+    sendRequest(s"#r ${dotnetLibPath}/Microsoft.Spark.dll")
+    sendRequest("using Microsoft.Spark.Sql;")
+    sendRequest("var spark = SparkSession.Builder().AppName(\"livy\").GetOrCreate()")
+
     isStarted.countDown()
     executionCount = 0
   }
@@ -201,9 +206,9 @@ class SparkDotnetInterpreter(
   }
 
   private def sendRequest(code: String): RequestResponse = {
-    // val ccode = StringEscapeUtils.escapeJava(code).stripMargin
     val ccode = code.stripMargin
     warn(s"About to execute '$ccode'")
+
     stdin.println(ccode)
     stdin.flush()
 
@@ -273,7 +278,7 @@ class SparkDotnetInterpreter(
         stdin.println(";")
         stdin.flush()
       }
-      
+
       readTo(marker, errorMarker, output)
     }
   }
