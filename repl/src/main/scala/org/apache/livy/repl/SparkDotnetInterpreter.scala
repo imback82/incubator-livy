@@ -175,7 +175,7 @@ class SparkDotnetInterpreter(
     warn(s"flusing: $content")
 
     val dotnetLibPath = sys.env.getOrElse("SPARK_DOTNET_PACKAGE_DIR", ".")
-    sendRequest(s"#r ${dotnetLibPath}/Microsoft.Spark.dll")
+    sendRequest("#r \"" + dotnetLibPath + "/Microsoft.Spark.dll\"")
     sendRequest("using Microsoft.Spark.Sql;")
     sendRequest("var spark = SparkSession.Builder().AppName(\"livy\").GetOrCreate()")
 
@@ -247,7 +247,7 @@ class SparkDotnetInterpreter(
       errorMarker: String,
       output: StringBuilder = StringBuilder.newBuilder): RequestResponse = {
     var char = readChar(output)
-    warn(s"readTo: '" + output.toString() + "'")
+    // warn(s"readTo: '" + output.toString() + "'")
     // Remove any ANSI color codes which match the pattern "\u001b\\[[0-9;]*[mG]".
     // It would be easier to do this with a regex, but unfortunately I don't see an easy way to do
     // without copying the StringBuilder into a string for each character.
