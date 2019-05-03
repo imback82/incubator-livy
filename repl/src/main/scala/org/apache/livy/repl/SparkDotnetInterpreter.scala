@@ -90,6 +90,8 @@ object SparkDotnetInterpreter extends Logging {
       }
 
       val builder = new ProcessBuilder(dotnetExec.split(" ").toSeq.asJava)
+      builder.directory(new File(sys.env.getOrElse("SPARK_DOTNET_PACKAGE_DIR", ".")))
+
       val env = builder.environment()
       env.put("SPARK_HOME", sys.env.getOrElse("SPARK_HOME", "."))
       env.put("DOTNETBACKEND_PORT", sparkDotnetBackendPort.toString)
@@ -140,44 +142,14 @@ class SparkDotnetInterpreter(
   private[this] val isStarted = new CountDownLatch(1)
 
   final override protected def waitUntilReady(): Unit = {
-    /*
-    // Set the option to catch and ignore errors instead of halting.
-    sendRequest("options(error = dump.frames)")
-    if (!ClientConf.TEST_MODE) {
-      // scalastyle:off line.size.limit
-      sendRequest("library(SparkR)")
-      sendRequest("""port <- Sys.getenv("EXISTING_SPARK_DOTNET_BACKEND_PORT", "")""")
-      sendRequest("""SparkR:::connectBackend("localhost", port, 6000)""")
-      sendRequest(
-        """assign(".scStartTime", as.integer(Sys.time()), envir = SparkR:::.sparkREnv)""")
-
-      sendRequest(
-        """assign(".sc", SparkR:::callJStatic("org.apache.livy.repl.SparkRInterpreter", "getSparkContext"), envir = SparkR:::.sparkREnv)""")
-      sendRequest("""assign("sc", get(".sc", envir = SparkR:::.sparkREnv), envir=.GlobalEnv)""")
-
-      if (sparkMajorVersion >= 2) {
-        sendRequest(
-          """assign(".sparkRsession", SparkR:::callJStatic("org.apache.livy.repl.SparkRInterpreter", "getSparkSession"), envir = SparkR:::.sparkREnv)""")
-        sendRequest(
-          """assign("spark", get(".sparkRsession", envir = SparkR:::.sparkREnv), envir=.GlobalEnv)""")
-      }
-
-      sendRequest(
-        """assign(".sqlc", SparkR:::callJStatic("org.apache.livy.repl.SparkRInterpreter", "getSQLContext"), envir = SparkR:::.sparkREnv)""")
-      sendRequest(
-        """assign("sqlContext", get(".sqlc", envir = SparkR:::.sparkREnv), envir = .GlobalEnv)""")
-      // scalastyle:on line.size.limit
-    }
-     */
-
     val response = readTo("> ", "lkdsajglksadjgkjasldg")
     val content = response;
     warn(s"flusing: $content")
 
     val dotnetLibPath = sys.env.getOrElse("SPARK_DOTNET_PACKAGE_DIR", ".")
-    sendRequest("#r \"" + dotnetLibPath + "/Microsoft.Spark.dll\"")
+    sendRequest("#r \"Microsoft.Spark.dll\"")
     sendRequest("using Microsoft.Spark.Sql;")
-    sendRequest("var spark = SparkSession.Builder().AppName(\"livy\").GetOrCreate()")
+    sendRequest("var spark = SparkSession.Builder().AppName(\"livy\").GetOrCreate();")
 
     isStarted.countDown()
     executionCount = 0
