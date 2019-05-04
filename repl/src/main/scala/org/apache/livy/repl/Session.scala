@@ -105,6 +105,7 @@ class Session(
             throw new IllegalStateException("SparkInterpreter should not be lazily created.")
           case PySpark => PythonInterpreter(sparkConf, entries)
           case SparkR => SparkRInterpreter(sparkConf, entries)
+	  case SparkDotnet => SparkDotnetInterpreter(sparkConf, entries)
           case SQL => new SQLInterpreter(sparkConf, livyConf, entries)
         }
         interp.start()
@@ -348,6 +349,8 @@ class Session(
           case "2" =>
             (s"""setJobGroup("$jobGroup", "Job group for statement $jobGroup", FALSE)""", SparkR)
         }
+      case SparkDotnet =>
+        (s"""spark.SparkContext.SetJobGroup("$jobGroup", "Job group for statement $jobGroup")""", SparkDotnet)
     }
     // Set the job group
     executeCode(interpreter(tpe), statementId, cmd)

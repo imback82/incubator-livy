@@ -31,6 +31,8 @@ object PySpark extends Kind("pyspark")
 
 object SparkR extends Kind("sparkr")
 
+object SparkDotnet extends Kind("sparkdotnet")
+
 object Shared extends Kind("shared")
 
 object SQL extends Kind("sql")
@@ -41,6 +43,7 @@ object Kind {
     case "spark" | "scala" => Spark
     case "pyspark" | "python" => PySpark
     case "sparkr" | "r" => SparkR
+    case "sparkdotnet" | "dotnet" => SparkDotnet
     case "shared" => Shared
     case "sql" => SQL
     case other => throw new IllegalArgumentException(s"Invalid kind: $other")
